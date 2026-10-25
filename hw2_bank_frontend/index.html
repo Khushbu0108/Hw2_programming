@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Global Bank Enterprise System frontend for HW2">
+  <title>Global Bank Enterprise System</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-mark" aria-hidden="true">GB</div>
+      <div>
+        <p class="eyebrow">ENTERPRISE BANKING</p>
+        <h1>Global Bank Enterprise System</h1>
+      </div>
+      <span id="modeBadge" class="mode-badge">DEMO MODE</span>
+    </header>
+
+    <nav class="tabs" aria-label="Application sections">
+      <button class="tab-button active" id="customerTab" type="button" aria-controls="customerPortal" aria-selected="true">Customer Portal</button>
+      <button class="tab-button" id="companyTab" type="button" aria-controls="companyPortal" aria-selected="false">Company Back Office</button>
+    </nav>
+
+    <main>
+      <section id="customerPortal" class="panel" aria-labelledby="transferHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CUSTOMER SERVICES</p>
+            <h2 id="transferHeading">Transfer Funds</h2>
+            <p class="muted">Move funds between accounts and review the result.</p>
+          </div>
+          <div class="heading-icon" aria-hidden="true">↗</div>
+        </div>
+
+        <form id="transferForm" novalidate>
+          <div class="field">
+            <label for="fromAccount">Withdraw From Account</label>
+            <select id="fromAccount" name="fromAccountId" required>
+              <option value="1">Account 1</option>
+              <option value="2">Account 2</option>
+              <option value="3">Account 3</option>
+              <option value="4">Account 4</option>
+              <option value="5">Account 5</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="toAccount">Deposit To Account</label>
+            <select id="toAccount" name="toAccountId" required>
+              <option value="2">Account 2</option>
+              <option value="1">Account 1</option>
+              <option value="3">Account 3</option>
+              <option value="4">Account 4</option>
+              <option value="5">Account 5</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="amount">Transfer Amount (USD)</label>
+            <div class="amount-input">
+              <span aria-hidden="true">$</span>
+              <input id="amount" name="amountString" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required>
+            </div>
+            <small class="field-hint">Enter a positive amount with up to two decimal places.</small>
+          </div>
+
+          <button class="primary-button" id="transferButton" type="submit">
+            <span>Initiate Transfer</span><span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <div id="transferMessage" class="message" role="status" aria-live="polite" hidden></div>
+        <div class="notice">
+          <span class="notice-icon" aria-hidden="true">i</span>
+          <p><strong>Transfer security</strong><br>Transfers should be validated and committed atomically by the backend. Demo mode changes only temporary browser data.</p>
+        </div>
+      </section>
+
+      <section id="companyPortal" class="panel" aria-labelledby="dashboardHeading" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">INTERNAL OPERATIONS</p>
+            <h2 id="dashboardHeading">Administrative Dashboard</h2>
+            <p class="muted">Review account balances and recent transaction records.</p>
+          </div>
+          <div class="heading-icon" aria-hidden="true">▦</div>
+        </div>
+
+        <div class="dashboard-actions">
+          <div>
+            <span class="status-dot" id="connectionDot"></span>
+            <span id="connectionStatus">Using local demo data</span>
+          </div>
+          <button id="refreshButton" class="primary-button compact" type="button">
+            <span>Refresh Database Records</span><span aria-hidden="true">↻</span>
+          </button>
+        </div>
+
+        <div id="dashboardMessage" class="message" role="status" aria-live="polite" hidden></div>
+
+        <div class="table-section">
+          <div class="table-title">
+            <h3>Active Accounts</h3>
+            <span id="accountCount" class="count-pill">0 accounts</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Account ID (k1)</th><th>Balance (a)</th><th>Data (b)</th></tr></thead>
+              <tbody id="accountsBody"><tr><td colspan="3" class="empty-state">Loading accounts…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="table-section">
+          <div class="table-title">
+            <h3>Recent Transaction Records (t2)</h3>
+            <span id="transactionCount" class="count-pill">0 records</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>TX ID</th><th>Account</th><th>Amount</th><th>Type</th><th>Timestamp</th></tr></thead>
+              <tbody id="transactionsBody"><tr><td colspan="5" class="empty-state">No records loaded.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Global Bank Enterprise System</span>
+      <span>HW2 frontend · HTML, CSS and JavaScript</span>
+    </footer>
+  </div>
+</body>
+</html>
