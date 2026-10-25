@@ -1,0 +1,30 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/admin/create-tables"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/initialize-lookups"
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/browse?table=products&limit=10"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/clear-table"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/summary"
+    }
+  ],
+  "mockMode": true
+}

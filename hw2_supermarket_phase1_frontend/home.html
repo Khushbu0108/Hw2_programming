@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SuperMart Chain | HW2 Phase 1</title><link rel="stylesheet" href="styles.css"><script src="app.js" defer></script></head>
+<body><div class="shell">
+<header><div class="logo">SM</div><div><p class="eyebrow">SUPERMARKET OPERATIONS PLATFORM</p><h1>SuperMart Chain</h1><p>HW2 · Phase 1 checkout simulation and back office</p></div><span id="modeBadge" class="badge">MOCK MODE</span></header>
+<nav><button id="frontTab" class="tab active">Front Desk / Checkout</button><button id="backTab" class="tab">Company Back Office</button></nav>
+<main>
+<section id="front">
+<div class="section-head"><div><p class="eyebrow blue">CUSTOMER CHECKOUT</p><h2>Register Checkout</h2><p class="muted">Simulate a receipt with 10–20 randomly selected items.</p></div><span class="icon">🛒</span></div>
+<form id="checkoutForm" class="form-grid">
+<div class="field"><label for="store">Store location</label><select id="store"><option value="1">Store 1 · Houston, TX</option><option value="2">Store 2 · Dallas, TX</option><option value="26">Store 26 · Phoenix, AZ</option><option value="51">Store 51 · Miami, FL</option><option value="76">Store 76 · Atlanta, GA</option></select></div>
+<div class="field"><label for="payment">Payment method</label><select id="payment"><option value="CARD">Card (debit bank account)</option><option value="CASH">Cash</option></select></div>
+<div class="field"><label for="bank">Bank account (card only)</label><select id="bank"><option value="1">Bank account 1</option><option value="2">Bank account 2</option><option value="3">Bank account 3</option></select></div>
+<div class="field"><label for="items">Number of items</label><select id="items"><option>10</option><option selected>12</option><option>15</option><option>20</option></select></div>
+<div class="field full"><label for="customer">Customer ID (optional)</label><input id="customer" type="number" min="1" placeholder="Leave blank for walk-in customer"></div>
+<div class="full"><button id="checkoutBtn" class="primary">Run Checkout Simulation →</button></div></form>
+<div id="checkoutMsg" class="message" role="status" hidden></div>
+<section class="card"><div class="cardhead"><div><p class="eyebrow blue">LATEST SIMULATION</p><h3>Receipt preview</h3></div><span id="receiptStatus" class="pill">Not run yet</span></div><div id="receipt"><p class="empty">Run a checkout simulation to populate receipt items.</p></div></section>
+</section>
+<section id="back" hidden>
+<div class="section-head"><div><p class="eyebrow blue">INTERNAL OPERATIONS</p><h2>Company Back Office</h2><p class="muted">Set up database, initialize lookup data, inspect tables, and test reports.</p></div><span class="icon">▦</span></div>
+<div class="callout"><strong>Phase 1 workflow</strong><p>Create tables → Initialize lookup data → Test front desk → Run back-office queries. Destructive actions require confirmation.</p></div>
+<div class="admin-grid">
+<article class="card admin"><h3>Database setup</h3><p>Create the application schema and tables.</p><button id="createBtn" class="secondary">Create Tables</button></article>
+<article class="card admin"><h3>Lookup initialization</h3><p>Load stores, aisles, products, tax rules, and bank accounts.</p><button id="initBtn" class="secondary">Initialize Lookup Tables</button></article>
+<article class="card admin"><h3>Front desk test</h3><p>Run a sample checkout with random items.</p><button id="testFrontBtn" class="secondary">Test Front Desk</button></article>
+<article class="card admin"><h3>Back-office test</h3><p>Run reports for sales, inventory, and payments.</p><button id="testBackBtn" class="secondary">Test Back Office Queries</button></article></div>
+<div class="tools"><div class="field"><label for="table">Table to browse</label><select id="table"><option>stores</option><option>aisles</option><option>products</option><option>inventory</option><option>customers</option><option>bank_accounts</option><option>sales</option><option>sale_items</option><option>payments</option></select></div><button id="browseBtn" class="secondary">Browse 10 Rows</button><button id="clearBtn" class="danger">Delete All Rows in Selected Table</button></div>
+<div id="adminMsg" class="message" role="status" hidden></div>
+<section class="card"><div class="cardhead"><h3 id="tableTitle">Table preview</h3><span id="rowCount" class="pill">Mock preview</span></div><div class="tablewrap"><table><thead id="thead"></thead><tbody id="tbody"><tr><td class="empty">Choose Browse 10 Rows to view sample data.</td></tr></tbody></table></div></section>
+<section class="card"><div class="cardhead"><h3>SQL Trace / Query Results</h3></div><pre id="trace">SQL trace appears here. Mock mode does not execute SQL.</pre></section>
+</section></main><footer><span>SuperMart Chain · COSC 3380 HW2 Phase 1</span><a href="README.md">README / API contract</a></footer></div>
+<dialog id="confirmDialog"><form method="dialog" class="dialog"><h2>Confirm destructive operation</h2><p id="confirmText">This operation cannot be undone.</p><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm" class="danger">Confirm delete</button></div></form></dialog>
+</body></html>
