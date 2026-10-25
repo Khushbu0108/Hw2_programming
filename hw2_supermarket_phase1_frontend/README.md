@@ -1,7 +1,5 @@
 # SuperMart Chain — HW2 Phase 1 Frontend
 
-Person 1 can develop and test this UI before the database/backend is ready. Open `home.html` directly or with VS Code Live Server.
-
 **Important:** `MOCK_MODE = true` means operations affect browser memory only. This is not a completed Phase 1 database app. Change to `false` only after the backend endpoints below are implemented.
 
 ## Backend API contract
