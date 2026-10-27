@@ -1,41 +1,108 @@
-# SuperMart Chain — HW2 Phase 1 Frontend
+# SuperMart Chain - COSC 3380 HW2 Phase 1
 
-**Important:** `MOCK_MODE = true` means operations affect browser memory only. This is not a completed Phase 1 database app. Change to `false` only after the backend endpoints below are implemented.
+## Team
 
-## Backend API contract
+| Member | Responsibility |
+|---|---|
+| Khusbhu Talaviya | Front End Design |
+| Salman Zariwala | Back End Design |
+| Benjamin Tri Minh Nguyen | DB and ER Design |
 
-Base URL: `http://localhost:3000`
 
-- `POST /api/admin/create-tables` — create tables.
-- `POST /api/admin/initialize-lookups` — seed reference data.
-- `POST /api/checkout` — run checkout; request fields: `storeId`, `paymentMethod` (`CARD` or `CASH`), `bankAccountId` (card only), `itemCount` (10–20), `customerId` (optional).
-- `GET /api/admin/browse?table=products&limit=10` — return `{success:true,rows:[...]}`. Backend must allowlist table names and cap limit.
-- `POST /api/admin/clear-table` — request `{table:"sales"}`; validate table against a strict allowlist.
-- `GET /api/reports/summary` — run back-office join reports.
-- Recommended: `GET /api/health`.
+## Requirements
 
-Successful checkout should return `{success:true, receipt:{sale_id,store_name,store_id,payment_method,subtotal,tax_total,total,created_at,items}}`. Each item should include `sku`, `product_name`, `unit_price`, `quantity`, `unit`, and `line_total`.
+- Node.js 18+
+- Local PostgreSQL 14+
+- Browser
 
-## Database teammate requirements
+## Setup
 
-Design a normalized schema including at least: `stores`, `aisles`, `products`, `inventory`, `customers`, `bank_accounts` (separate from supermarket operational tables), `sales`, `sale_items`, `payments`, and `tax_rules`. Use PKs, FKs, checks, and indexes. `inventory` can have composite key `(store_id, product_id)`; `sale_items` can have `(sale_id, line_number)`.
+1. Create an empty database:
+   ```
+   createdb supermart_hw2
+   ```
+2. Copy `_env_TEMPLATE` to a file named `.env` and fill in your PostgreSQL password:
+   ```
+   PGHOST=localhost
+   PGPORT=5432
+   PGDATABASE=supermart_hw2
+   PGUSER=postgres
+   PGPASSWORD=[PASSWORD]
+   ```
+3. Install and start:
+   ```
+   npm install
+   npm start
+   ```
+4. Open <http://localhost:3000> (it redirects to `home.html`).
+   Health check: <http://localhost:3000/api/health>.
 
-Seed the required lookup data in PostgreSQL, not CSV: at least 100 stores in at least four states, 20–40 aisles per store, and at least 10 meaningful lookup rows. Include state-dependent tax and tax-exempt products. Produce/meat items should demonstrate quantity or weight.
+## How to use the app
 
-## Backend transaction requirements
+Go to the **Company Back Office** tab and follow the Phase 1 steps:
 
-Card checkout must atomically write the sale, receipt lines, inventory changes, payment, and debit the separate bank account. Cash checkout records cash payment without a bank debit. Any error must roll back all changes. Use parameterized SQL. The receipt must preserve item price and quantity/weight plus the total due.
+1. **Create Tables** - runs `schema.sql` (safe to click more than once).
+2. **Initialize Lookup Tables** - runs `seed.sql`: 100 stores in 4 states, 20-40 aisles per store, 20 products, state tax rules, inventory for every store, 12 customers, 12 bank accounts. Re-running it resets the bank balances.
+3. **Test Front Desk** - runs a card checkout of 10 random items at store 1 and shows the receipt and the new bank balance.
+4. **Test Back Office Queries** - runs the six join reports in `query.sql`.
+5. **Browse 10 Rows** - previews any table. **Delete All Rows** empties the selected table (`TRUNCATE ... CASCADE`) after a confirmation dialog.
 
-## Phase 1 requirements from the attached assignment
+The Front Desk tab lets you choose store, payment method (card or cash), bank account, and
+number of items (10-20) and run a checkout. The panel at the bottom of the back office shows the SQL
+that was sent to the database.
 
-- Preliminary ER model
-- At least five SQL tables
-- Local JavaScript/HTML app connected to PostgreSQL
-- At least one transaction that updates multiple tables, including bank account for card payments
-- At least three useful queries involving joins
-- Front desk and back-office test buttons
-- Create tables, initialize lookups, browse about 10 rows, and clear-table action with confirmation
-- Easy simulation and informative error messages
-- `transaction.sql` and `query.sql` SQL trace files
+Demo account for the failure case: bank account 3 has only $5.00, so a card checkout with it
+fails with an insufficient-funds error and everything is rolled back.
 
-Mock mode alone does not satisfy these requirements; integrate and test the real backend before submission.
+## Database design
+
+- **Supermarket schema (`public`)**: `tax_rules`, `stores`, `aisles`, `products`, `inventory`,
+  `customers`, `sales`, `sale_items`, `payments`.
+- **Bank schema (`bank`)**: `bank_accounts`, `bank_transactions`. This is kept separate from the
+  store tables, and nothing in `public` has a foreign key into `bank`. `payments.bank_account_id`
+  only stores the account number.
+- Composite keys: `inventory (store_id, product_id)` and `sale_items (sale_id, line_number)`.
+- Lookup tables: `tax_rules`, `stores`, `aisles`, `products`, `customers`.
+  Transaction tables: `inventory`, `sales`, `sale_items`, `payments`, bank tables.
+- Tax varies by state (TX 8.25%, AZ 5.6%, FL 6%, GA 4%); produce is tax exempt; produce sold per
+  pound is stored by weight (`quantity` in pounds), meat is pre-packaged.
+- Intentional 3NF denormalization (documented in the report): stored totals (`sales.subtotal`,
+  `tax_total`, `total`, and the line amounts in `sale_items`) and the `unit_price` snapshot on each
+  receipt line.
+
+Files: `schema.sql` (DDL and indexes), `seed.sql` (lookup data).
+
+## The checkout transaction
+
+`POST /api/checkout` runs one atomic transaction (see `transaction.sql`):
+
+1. Build the receipt cart in a temp table (random items, quantity or weight, tax per state).
+2. Lock the stock rows in `product_id` order.
+3. Card only: debit `bank.bank_accounts` and write `bank.bank_transactions`.
+4. Insert `sales`, `sale_items`, reduce `inventory`, insert `payments`.
+5. `COMMIT`. Any error triggers `ROLLBACK`, so no partial data remains.
+
+## SQL trace files
+
+- `transaction.sql` - the checkout transaction (success, failure with rollback, cash checkout).
+  Run it directly with `psql -d supermart_hw2 -f transaction.sql`.
+- `query.sql` - the six back-office report queries
+
+## API
+
+All endpoints are served from `http://localhost:3000`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/health` | Check backend and database connection |
+| POST | `/api/admin/create-tables` | Run `schema.sql` |
+| POST | `/api/admin/initialize-lookups` | Run `seed.sql` |
+| GET | `/api/admin/browse?table=products&limit=10` | Preview rows (table allowlist, limit capped) |
+| POST | `/api/admin/clear-table` | Body `{table}`; allowlisted, UI asks for confirmation |
+| POST | `/api/checkout` | Body `{storeId, paymentMethod, bankAccountId, itemCount, customerId}` |
+| GET | `/api/reports/summary` | Run the reports in `query.sql` |
+
+## Project files
+
+`server.js`, `supermarket.js`, `db.js` (backend) - `home.html`, `app.js`, `styles.css` (frontend) -
+`schema.sql`, `seed.sql`, `transaction.sql`, `query.sql` (SQL) - `API_CONTRACT.json`.
