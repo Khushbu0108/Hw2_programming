@@ -54,55 +54,8 @@ that was sent to the database.
 Demo account for the failure case: bank account 3 has only $5.00, so a card checkout with it
 fails with an insufficient-funds error and everything is rolled back.
 
-## Database design
+## ER Model
 
-- **Supermarket schema (`public`)**: `tax_rules`, `stores`, `aisles`, `products`, `inventory`,
-  `customers`, `sales`, `sale_items`, `payments`.
-- **Bank schema (`bank`)**: `bank_accounts`, `bank_transactions`. This is kept separate from the
-  store tables, and nothing in `public` has a foreign key into `bank`. `payments.bank_account_id`
-  only stores the account number.
-- Composite keys: `inventory (store_id, product_id)` and `sale_items (sale_id, line_number)`.
-- Lookup tables: `tax_rules`, `stores`, `aisles`, `products`, `customers`.
-  Transaction tables: `inventory`, `sales`, `sale_items`, `payments`, bank tables.
-- Tax varies by state (TX 8.25%, AZ 5.6%, FL 6%, GA 4%); produce is tax exempt; produce sold per
-  pound is stored by weight (`quantity` in pounds), meat is pre-packaged.
-- Intentional 3NF denormalization (documented in the report): stored totals (`sales.subtotal`,
-  `tax_total`, `total`, and the line amounts in `sale_items`) and the `unit_price` snapshot on each
-  receipt line.
+ER Model image was made with draw.io
 
-Files: `schema.sql` (DDL and indexes), `seed.sql` (lookup data).
-
-## The checkout transaction
-
-`POST /api/checkout` runs one atomic transaction (see `transaction.sql`):
-
-1. Build the receipt cart in a temp table (random items, quantity or weight, tax per state).
-2. Lock the stock rows in `product_id` order.
-3. Card only: debit `bank.bank_accounts` and write `bank.bank_transactions`.
-4. Insert `sales`, `sale_items`, reduce `inventory`, insert `payments`.
-5. `COMMIT`. Any error triggers `ROLLBACK`, so no partial data remains.
-
-## SQL trace files
-
-- `transaction.sql` - the checkout transaction (success, failure with rollback, cash checkout).
-  Run it directly with `psql -d supermart_hw2 -f transaction.sql`.
-- `query.sql` - the six back-office report queries
-
-## API
-
-All endpoints are served from `http://localhost:3000`.
-
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/health` | Check backend and database connection |
-| POST | `/api/admin/create-tables` | Run `schema.sql` |
-| POST | `/api/admin/initialize-lookups` | Run `seed.sql` |
-| GET | `/api/admin/browse?table=products&limit=10` | Preview rows (table allowlist, limit capped) |
-| POST | `/api/admin/clear-table` | Body `{table}`; allowlisted, UI asks for confirmation |
-| POST | `/api/checkout` | Body `{storeId, paymentMethod, bankAccountId, itemCount, customerId}` |
-| GET | `/api/reports/summary` | Run the reports in `query.sql` |
-
-## Project files
-
-`server.js`, `supermarket.js`, `db.js` (backend) - `home.html`, `app.js`, `styles.css` (frontend) -
-`schema.sql`, `seed.sql`, `transaction.sql`, `query.sql` (SQL) - `API_CONTRACT.json`.
+![Image](ER diagram.drawio.png)
